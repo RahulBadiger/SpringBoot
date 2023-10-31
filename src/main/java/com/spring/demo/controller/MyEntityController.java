@@ -5,6 +5,7 @@ import com.spring.demo.service.MyEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +52,7 @@ public class MyEntityController {
         }
     }
 
+    @Transactional
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<Void> deleteEntity(@PathVariable UUID id) {
         boolean deleted = entityService.delete(id);

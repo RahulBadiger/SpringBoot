@@ -34,7 +34,7 @@ public class MyEntityService {
     }
 
     public MyEntity update(UUID id, MyEntity updatedEntity) {
-        if (!entityRepository.existsById(id)) {
+        if (entityRepository.existsById(id)) {
             throw new IllegalArgumentException("Entity not found with ID: " + id);
         }
         updatedEntity.setId(id);
@@ -42,10 +42,11 @@ public class MyEntityService {
     }
 
     public boolean delete(UUID id) {
-        if (!entityRepository.existsById(id)) {
+        if (entityRepository.existsById(id)) {
+            entityRepository.deleteById(id);
+            return true;
+        } else {
             throw new IllegalArgumentException("Entity not found with ID: " + id);
         }
-        entityRepository.deleteById(id);
-        return true;
     }
 }
