@@ -20,12 +20,14 @@ public class MyEntityController {
         this.entityService = entityService;
     }
 
+    @Transactional
     @PostMapping("/create")
     public ResponseEntity<MyEntity> createEntity(@RequestBody MyEntity entity) {
         MyEntity createdEntity = entityService.create(entity);
         return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
     }
 
+    @Transactional
     @GetMapping("/getById/{id}")
     public ResponseEntity<MyEntity> getEntity(@PathVariable UUID id) {
         MyEntity entity = entityService.getById(id);
@@ -36,12 +38,14 @@ public class MyEntityController {
         }
     }
 
+    @Transactional
     @GetMapping("/getAll")
     public ResponseEntity<List<MyEntity>> getAllEntities() {
         List<MyEntity> entities = entityService.getAll();
         return new ResponseEntity<>(entities, HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping("/updateById/{id}")
     public ResponseEntity<MyEntity> updateEntity(@PathVariable UUID id, @RequestBody MyEntity updatedEntity) {
         MyEntity entity = entityService.update(id, updatedEntity);
