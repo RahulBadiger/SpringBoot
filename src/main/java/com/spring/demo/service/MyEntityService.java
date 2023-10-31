@@ -34,10 +34,10 @@ public class MyEntityService {
     }
 
     public MyEntity update(UUID id, MyEntity updatedEntity) {
-        if (entityRepository.existsById(id)) {
+        if (!entityRepository.existsById(id)) {
             throw new IllegalArgumentException("Entity not found with ID: " + id);
         }
-        updatedEntity.setId(id); // Ensure the ID in the updated entity matches the path ID
+        updatedEntity.setId(id);
         return entityRepository.save(updatedEntity);
     }
 
