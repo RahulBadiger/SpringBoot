@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
   demo-spring:
-    image: demo-hcx-springboot:latest
+    image: springboot/8-jdk-alpine-maven:latest
     ports:
       - "8090:8090"
     depends_on :
