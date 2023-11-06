@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-svc
+  template:
+    metadata:
+      labels:
+        app: spring-svc
+    spec:
+      containers:
+        - image: rahulmb07/springboot_img:latest
+          name: spring-svc
+          ports:
+            - containerPort: 8090
+          env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: changeme
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgresql:5432/northwind?useSSL=false
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update

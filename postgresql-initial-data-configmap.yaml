@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-initdb-config
+data:
+  init.sql: |
+    CREATE TABLE my_table (
+      id UUID PRIMARY KEY,
+      dataSchema JSONB,
+      routerConfig JSONB,
+      status VARCHAR(255) NOT NULL,
+      created_by VARCHAR(255),
+      updated_by VARCHAR(255),
+      created_date TIMESTAMP,
+      updated_date TIMESTAMP
+    );
+
+    INSERT INTO my_table (dataSchema, routerConfig, status, created_by, updated_by)
+    VALUES (
+      '{"key1": "value1", "key2": "value2"}'::jsonb,
+      '{"key3": "value3", "key4": "value4"}'::jsonb,
+      'Live',
+      'John Doe',
+      'John Doe'
+    );
+
+
