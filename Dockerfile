@@ -14,7 +14,6 @@
 
 FROM openjdk:11-jdk-slim
 VOLUME /tmp
-EXPOSE 8090
 RUN mkdir -p /app/
 RUN mkdir -p /app/logs/
 COPY target/datasetProj-0.0.1-SNAPSHOT.jar /app/app.jar
