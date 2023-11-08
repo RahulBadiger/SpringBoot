@@ -35,7 +35,7 @@ public class MyEntityService {
 
     public MyEntity update(UUID id, MyEntity updatedEntity) {
         if (entityRepository.existsById(id)) {
-            updatedEntity.setId(id);
+            updatedEntity.setId(id);//this method ensure that the entity retains its same identifier or same id is reatined
             return entityRepository.save(updatedEntity);
         } else {
             throw new IllegalArgumentException("Entity not found with ID: " + id);
