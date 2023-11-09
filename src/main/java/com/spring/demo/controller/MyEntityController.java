@@ -22,48 +22,76 @@ public class MyEntityController {
 
     @Transactional
     @PostMapping("/create")
-    public ResponseEntity<MyEntity> createEntity(@RequestBody MyEntity entity) {
-        MyEntity createdEntity = entityService.create(entity);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+    public ResponseEntity<CustomResponse> createEntity(@RequestBody MyEntity entity) {
+        try {
+            MyEntity createdEntity = entityService.create(entity);
+            CustomResponse response = new CustomResponse("User added successfully", HttpStatus.CREATED.value());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            CustomResponse response = new CustomResponse("Cannot create user", HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+
+    @Transactional
+    @GetMapping("/getAll")
+    public ResponseEntity<CustomResponse> getAllEntities() {
+        List<MyEntity> entities = entityService.getAll();
+        if (!entities.isEmpty()) {
+            CustomResponse response = new CustomResponse("Users retrieved successfully", HttpStatus.OK.value(),entities);
+            return ResponseEntity.ok(response);
+        } else {
+            CustomResponse response = new CustomResponse("No users found. Start by creating one!", HttpStatus.OK.value(),entities);
+            return ResponseEntity.ok(response);
+        }
     }
 
     @Transactional
     @GetMapping("/getById/{id}")
-    public ResponseEntity<MyEntity> getEntity(@PathVariable UUID id) {
+    public ResponseEntity<CustomResponse> getEntity(@PathVariable UUID id) {
         MyEntity entity = entityService.getById(id);
-        if (entity != null) {
-            return new ResponseEntity<>(entity, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 
-    @Transactional
-    @GetMapping("/getAll")
-    public ResponseEntity<List<MyEntity>> getAllEntities() {
-        List<MyEntity> entities = entityService.getAll();
-        return new ResponseEntity<>(entities, HttpStatus.OK);
+        if (entity != null) {
+            CustomResponse response = new CustomResponse("User retrieved successfully", HttpStatus.OK.value(), entity);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            CustomResponse response = new CustomResponse("User not found with ID: " + id, HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
     @Transactional
     @PutMapping("/updateById/{id}")
-    public ResponseEntity<MyEntity> updateEntity(@PathVariable UUID id, @RequestBody MyEntity updatedEntity) {
-        MyEntity entity = entityService.update(id, updatedEntity);
-        if (entity != null) {
-            return new ResponseEntity<>(entity, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<CustomResponse> updateEntity(@PathVariable UUID id, @RequestBody MyEntity updatedEntity) {
+        try {
+            boolean updated = entityService.update(id, updatedEntity);
+
+            if (updated) {
+                CustomResponse response = new CustomResponse("User updated successfully", HttpStatus.OK.value());
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            } else {
+                CustomResponse response = new CustomResponse("Cannot update user with ID: " + id, HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (IllegalArgumentException e) {
+            CustomResponse response = new CustomResponse("Cannot update user: " + e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
+
     @Transactional
     @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<Void> deleteEntity(@PathVariable UUID id) {
+    public ResponseEntity<CustomResponse> deleteEntity(@PathVariable UUID id) {
         boolean deleted = entityService.delete(id);
+
         if (deleted) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            CustomResponse response = new CustomResponse("User deleted successfully", HttpStatus.OK.value());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            CustomResponse response = new CustomResponse("Cannot delete user with ID: " + id, HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 }
