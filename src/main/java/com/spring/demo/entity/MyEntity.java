@@ -145,5 +145,4 @@ public class MyEntity implements Serializable {
                 '}';
     }
 
-    // Constructors, getters, and setters
 }

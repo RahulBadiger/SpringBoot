@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomResponse {
     private String message;
-    private int status_code;
+    private int statusCode; // Changed from status_code to statusCode
     private Object data;
 
-    public CustomResponse(String message, int status_code) {
+    public CustomResponse(String message, int statusCode) {
         this.message = message;
-        this.status_code = status_code;
+        this.statusCode = statusCode;
     }
 
-    public CustomResponse(String message, int status_code, Object data) {
+    public CustomResponse(String message, int statusCode, Object data) {
         this.message = message;
-        this.status_code = status_code;
+        this.statusCode = statusCode;
         this.data = data;
     }
 
@@ -23,8 +23,8 @@ public class CustomResponse {
         return message;
     }
 
-    public int getStatus_code() {
-        return status_code;
+    public int getStatusCode() { // Updated getter method name
+        return statusCode;
     }
 
     public Object getData() {

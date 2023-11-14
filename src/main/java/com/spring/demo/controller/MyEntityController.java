@@ -33,6 +33,10 @@ public class MyEntityController {
         }
     }
 
+    @GetMapping("/home")
+    public String home(){
+       return  "home page ";
+    }
 
     @Transactional
     @GetMapping("/getAll")
