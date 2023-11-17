@@ -47,7 +47,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void create_entity_success_scenario() throws Exception {
+    public void create_Entity_Success_Scenario() throws Exception {
         MyEntity entity = new MyEntity();
         UUID uuid=UUID.randomUUID();
         when(entityService.create(any(MyEntity.class))).thenReturn(entity);
@@ -63,7 +63,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotCreateEntity() throws Exception {
+    public void create_Entity_Failure_Scenario() throws Exception {
         MyEntity entity = new MyEntity();
         when(entityService.create(any(MyEntity.class))).thenThrow(HttpMessageNotReadableException.class);
 
@@ -78,7 +78,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testGetAllEntities() throws Exception {
+    public void getAll_Entities_Success_Scenario() throws Exception {
         MyEntity entity = new MyEntity();
 
         List<MyEntity> entityList = new ArrayList<>();
@@ -93,7 +93,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotGetAllEntities() throws Exception {
+    public void getAll_Entities_Failure_Scenario() throws Exception {
         MyEntity entity = new MyEntity();
         when(entityService.getAll()).thenReturn(Collections.emptyList());
 
@@ -104,7 +104,7 @@ public class MyEntityControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
     @Test
-    public void testNotGetAllEntities_Exce() throws Exception {
+    public void getAll_Entities_Exception_Scenario() throws Exception {
         MyEntity entity = new MyEntity();
         when(entityService.getAll()).thenThrow(MethodArgumentTypeMismatchException.class);
 
@@ -115,7 +115,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testGetEntityById() throws Exception {
+    public void get_Entities_ById_Success_Scenario() throws Exception {
         UUID entityId = UUID.randomUUID();
         MyEntity entity = new MyEntity();
         entity.setId(entityId);
@@ -129,7 +129,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotGetEntityById() throws Exception {
+    public void get_Entities_ById_Failure_Scenario() throws Exception {
         UUID entityId = UUID.randomUUID();
         MyEntity entity = new MyEntity();
 
@@ -141,7 +141,7 @@ public class MyEntityControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(HttpStatus.NOT_FOUND.value()));
     }
     @Test
-    public void testNotGetEntityById_Exce() throws Exception {
+    public void get_Entities_ById_Exception_Scenario() throws Exception {
         UUID entityId = UUID.randomUUID();
         MyEntity entity = new MyEntity();
 
@@ -153,9 +153,24 @@ public class MyEntityControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
+    @Test
+    public void update_Entity_ById_Success_Scenario() throws Exception {
+        UUID entityId = UUID.randomUUID();
+        MyEntity updatedEntity = new MyEntity();
+        when(entityService.update(any(UUID.class),any(MyEntity.class))).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/" + entityId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedEntity)))
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value("User updated successfully"))
+                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()))
+                .andExpect(status().isOk());
+    }
+
 
     @Test
-    public void testNotUpdateEntity() throws Exception {
+    public void update_Entity_ById_Failure_Scenario() throws Exception {
         MyEntity updatedEntity = new MyEntity();
 
         UUID entityId = UUID.randomUUID();
@@ -172,7 +187,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotUpdateEntity_Exe() throws Exception {
+    public void update_Entity_ById_Exception_Scenario() throws Exception {
 
 
         UUID entityId = UUID.randomUUID();
@@ -188,24 +203,10 @@ public class MyEntityControllerTest {
     }
 
 
-    @Test
-    public void testUpdateEntity() throws Exception {
-        UUID entityId = UUID.randomUUID();
-        MyEntity updatedEntity = new MyEntity();
-        when(entityService.update(any(UUID.class),any(MyEntity.class))).thenReturn(true);
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/" + entityId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedEntity)))
-                .andDo(print())
-                .andExpect(jsonPath("$.message").value("User updated successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()))
-                .andExpect(status().isOk());
-    }
 
 
     @Test
-    public void testDeleteEntity() throws Exception {
+    public void delete_Entity_ById_Success_Scenario() throws Exception {
 
         UUID uuid=UUID.randomUUID();
 
@@ -218,7 +219,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotDeleteEntity() throws Exception {
+    public void delete_Entity_ById_Failure_Scenario() throws Exception {
 
         UUID uuid=UUID.randomUUID();
 
@@ -231,7 +232,7 @@ public class MyEntityControllerTest {
     }
 
     @Test
-    public void testNotDeleteEntity_Exec() throws Exception {
+    public void delete_Entity_ById_Exception_Scenario() throws Exception {
 
         UUID uuid=UUID.randomUUID();
 
