@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface MyEntityRepository extends JpaRepository<MyEntity, Long> {
+public interface MyEntityRepository extends JpaRepository<MyEntity, UUID> {
     boolean existsById(UUID id);
 
     void deleteById(UUID id);

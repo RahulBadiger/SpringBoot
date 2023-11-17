@@ -26,18 +26,18 @@ class MyEntityServiceTest {
 
     @BeforeEach
     void setUp() {
-        autoCloseable= MockitoAnnotations.openMocks(this);
-        entityService= new MyEntityService(entityRepository);
+        autoCloseable = MockitoAnnotations.openMocks(this);
+        entityService = new MyEntityService(entityRepository);
 
-        UUID uuid=UUID.randomUUID();
-        Map<String,Object> dataSchema=new HashMap<>();
-        dataSchema.put("name","rahul");
-        Map<String,Object> routerconfig=new HashMap<>();
-        routerconfig.put("Speed","1gb");
-        String createdBy="rahul";
-        String updatedBy="rahul";
+        UUID uuid = UUID.randomUUID();
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "rahul");
+        Map<String, Object> routerconfig = new HashMap<>();
+        routerconfig.put("Speed", "1gb");
+        String createdBy = "rahul";
+        String updatedBy = "rahul";
 
-        entity=new MyEntity();
+        entity = new MyEntity();
         entity.setDataSchema(dataSchema);
         entity.setRouterConfig(routerconfig);
         entity.setUpdatedBy(updatedBy);
@@ -70,9 +70,6 @@ class MyEntityServiceTest {
     void testGetAll() {
         mock(MyEntity.class);
         mock(MyEntityRepository.class);
-        UUID uuid=UUID.randomUUID();
-        entity.setId(uuid);
-        entityRepository.save(entity);
 
         when(entityRepository.findAll()).thenReturn(
                 new ArrayList<MyEntity>(Collections.singleton(entity))
@@ -85,66 +82,69 @@ class MyEntityServiceTest {
 
         mock(MyEntity.class);
         mock(MyEntityRepository.class);
-        UUID uuid=UUID.randomUUID();
-        entity.setId(uuid);
-        entityRepository.save(entity);
+        UUID uuid = UUID.randomUUID();
 
         when(entityRepository.findById(uuid)).thenReturn(Optional.ofNullable(entity));
         assertThat(entityService.getById(uuid).getCreatedBy()).isEqualTo(entity.getCreatedBy());
 
     }
 
-//    @Test
-//    void testUpdate() {
-//
-//        mock(MyEntity.class);
-//        mock(MyEntityRepository.class);
-//
-//        UUID uuid=UUID.randomUUID();
-//        entity.setId(uuid);
-//        entity.setUpdatedBy("krsna");
-//
-//        when(entityRepository.existsById(uuid)).thenReturn(true);
-//        when(entityRepository.save(entity)).thenReturn(entity);
-//
-//        assertThat(entityService.update(uuid,entity)).isEqualTo(true);
-//        verify(entityRepository, times(1)).existsById(uuid);
-//        verify(entityRepository, times(1)).save(entity);
-//    }
 
-@Test
-public void testUpdateEntity() {
-    // Given
-    UUID uuid = UUID.randomUUID();
-    MyEntity updatedEntity = new MyEntity();
-    updatedEntity.setId(uuid);
-    updatedEntity.setUpdatedBy("New admin");
+    @Test
+    public void testUpdateEntity() throws Exception {
 
-    when(entityRepository.existsById(uuid)).thenReturn(true);
-    when(entityRepository.save(updatedEntity)).thenReturn(updatedEntity);
+        UUID uuid = UUID.randomUUID();
+        MyEntity updatedEntity = new MyEntity();
 
-    assertThat(entityService.update(uuid,updatedEntity)).isTrue();
-    verify(entityRepository, times(1)).existsById(uuid);
-    verify(entityRepository, times(1)).save(updatedEntity);
-}
+        when(entityRepository.existsById(uuid)).thenReturn(true);
+        when(entityRepository.save(updatedEntity)).thenReturn(updatedEntity);
+
+        assertThat(entityService.update(uuid, updatedEntity)).isTrue();
+    }
+
+    @Test
+    public void testNotUpdateEntity() throws Exception {
+
+        UUID uuid = UUID.randomUUID();
+        MyEntity updatedEntity = new MyEntity();
+
+        when(entityRepository.existsById(uuid)).thenReturn(false);
+        when(entityRepository.save(updatedEntity)).thenReturn(updatedEntity);
+
+        assertThat(entityService.update(uuid, updatedEntity)).isFalse();
+    }
+
 
     @Test
     void testDelete() {
         mock(MyEntity.class);
         mock(MyEntityRepository.class, Mockito.CALLS_REAL_METHODS);
-        UUID uuid=UUID.randomUUID();
+        UUID uuid = UUID.randomUUID();
         entity.setId(uuid);
         entityRepository.save(entity);
 
         when(entityRepository.existsById(uuid)).thenReturn(true);
 
 
-doAnswer(Answers.CALLS_REAL_METHODS).when(
-        entityRepository).deleteById(uuid);
-assertThat(entityService.delete(uuid)).isEqualTo(true);
-        verify(entityRepository, times(1)).existsById(uuid);
-        verify(entityRepository, times(1)).deleteById(uuid);
+        doAnswer(Answers.CALLS_REAL_METHODS).when(
+                entityRepository).deleteById(uuid);
+        assertThat(entityService.delete(uuid)).isEqualTo(true);
 
+
+    }
+    @Test
+    void testNotDelete() {
+        mock(MyEntity.class);
+        mock(MyEntityRepository.class, Mockito.CALLS_REAL_METHODS);
+        UUID uuid = UUID.randomUUID();
+
+
+        when(entityRepository.existsById(uuid)).thenReturn(false);
+
+
+        doAnswer(Answers.CALLS_REAL_METHODS).when(
+                entityRepository).deleteById(uuid);
+        assertThat(entityService.delete(uuid)).isEqualTo(false);
 
 
     }

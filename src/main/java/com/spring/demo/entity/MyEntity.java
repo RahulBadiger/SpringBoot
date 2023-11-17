@@ -1,6 +1,7 @@
 package com.spring.demo.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import lombok.Builder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -47,8 +48,8 @@ public class MyEntity implements Serializable {
     private LocalDateTime updatedDate;
 
     public MyEntity() {
-        this.createdDate = LocalDateTime.now(); // Initialize createdDate with the current date and time
-        this.updatedDate = LocalDateTime.now(); // Initialize updatedDate with the current date and time
+        this.createdDate = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now();
     }
 
 
@@ -129,20 +130,6 @@ public class MyEntity implements Serializable {
 
     public void setUpdatedDate(LocalDateTime updatedDate) {
         this.updatedDate = updatedDate;
-    }
-
-    @Override
-    public String toString() {
-        return "YourEntity{" +
-                "id=" + id +
-                ", dataSchema='" + dataSchema + '\'' +
-                ", routerConfig='" + routerConfig + '\'' +
-                ", status=" + status +
-                ", createdBy='" + createdBy + '\'' +
-                ", updatedBy='" + updatedBy + '\'' +
-                ", createdDate=" + createdDate +
-                ", updatedDate=" + updatedDate +
-                '}';
     }
 
 }
