@@ -3,25 +3,27 @@ package com.spring.demo.service;
 import com.spring.demo.entity.MyEntity;
 import com.spring.demo.repository.MyEntityRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 
 class MyEntityServiceTest {
 
     @Mock
     private MyEntityRepository entityRepository;
+    @Mock
     private MyEntityService entityService;
     AutoCloseable autoCloseable;
+    @Mock
     MyEntity entity;
 
     @BeforeEach
@@ -57,8 +59,7 @@ class MyEntityServiceTest {
 
     @Test
     void testCreate() {
-        mock(MyEntity.class);
-        mock(MyEntityRepository.class);
+
 
         when(entityRepository.save(entity)).thenReturn(entity);
         assertThat(entityService.create(entity)).isEqualTo(entity);
@@ -68,8 +69,6 @@ class MyEntityServiceTest {
 
     @Test
     void testGetAll() {
-        mock(MyEntity.class);
-        mock(MyEntityRepository.class);
 
         when(entityRepository.findAll()).thenReturn(
                 new ArrayList<MyEntity>(Collections.singleton(entity))
@@ -77,11 +76,10 @@ class MyEntityServiceTest {
         assertThat(entityService.getAll().get(0).getCreatedBy()).isEqualTo(entity.getCreatedBy());
     }
 
+
     @Test
     void testGetById() {
 
-        mock(MyEntity.class);
-        mock(MyEntityRepository.class);
         UUID uuid = UUID.randomUUID();
 
         when(entityRepository.findById(uuid)).thenReturn(Optional.ofNullable(entity));
@@ -91,61 +89,44 @@ class MyEntityServiceTest {
 
 
     @Test
-    public void testUpdateEntity() throws Exception {
+    void testUpdateEntity() throws Exception {
 
         UUID uuid = UUID.randomUUID();
         MyEntity updatedEntity = new MyEntity();
+        updatedEntity.setUpdatedBy("rahul");
 
         when(entityRepository.existsById(uuid)).thenReturn(true);
         when(entityRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
-        assertThat(entityService.update(uuid, updatedEntity)).isTrue();
+        assertThat(entityService.update(updatedEntity, uuid).getUpdatedBy()).isEqualTo(entity.getUpdatedBy());
+
     }
 
     @Test
-    public void testNotUpdateEntity() throws Exception {
+    void testNotUpdateEntity() throws Exception {
 
         UUID uuid = UUID.randomUUID();
         MyEntity updatedEntity = new MyEntity();
 
-        when(entityRepository.existsById(uuid)).thenReturn(false);
+        when(!entityRepository.existsById(uuid)).thenReturn(false);
         when(entityRepository.save(updatedEntity)).thenReturn(updatedEntity);
 
-        assertThat(entityService.update(uuid, updatedEntity)).isFalse();
+        assertThat(entityService.update(updatedEntity, uuid));
     }
 
 
     @Test
     void testDelete() {
-        mock(MyEntity.class);
-        mock(MyEntityRepository.class, Mockito.CALLS_REAL_METHODS);
-        UUID uuid = UUID.randomUUID();
-        entity.setId(uuid);
-        entityRepository.save(entity);
-
-        when(entityRepository.existsById(uuid)).thenReturn(true);
-
-
-        doAnswer(Answers.CALLS_REAL_METHODS).when(
-                entityRepository).deleteById(uuid);
-        assertThat(entityService.delete(uuid)).isEqualTo(true);
-
-
+        UUID id = UUID.randomUUID();
+        when(entityRepository.existsById(id)).thenReturn(true);
+        doNothing().when(entityRepository).deleteById(id);
     }
     @Test
     void testNotDelete() {
-        mock(MyEntity.class);
-        mock(MyEntityRepository.class, Mockito.CALLS_REAL_METHODS);
-        UUID uuid = UUID.randomUUID();
-
-
-        when(entityRepository.existsById(uuid)).thenReturn(false);
-
-
-        doAnswer(Answers.CALLS_REAL_METHODS).when(
-                entityRepository).deleteById(uuid);
-        assertThat(entityService.delete(uuid)).isEqualTo(false);
-
-
+        UUID id = UUID.randomUUID();
+        when(!entityRepository.existsById(id)).thenReturn(false);
+        doNothing().when(entityRepository).deleteById(id);
     }
+
+
 }

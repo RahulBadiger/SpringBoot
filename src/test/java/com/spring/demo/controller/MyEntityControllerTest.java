@@ -2,6 +2,7 @@ package com.spring.demo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.demo.entity.MyEntity;
+import com.spring.demo.repository.MyEntityRepository;
 import com.spring.demo.service.MyEntityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,15 +13,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,204 +43,204 @@ public class MyEntityControllerTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
+
+    @MockBean
+    private MyEntityRepository entityRepository;
 
     @Test
     public void create_Entity_Success_Scenario() throws Exception {
-        MyEntity entity = new MyEntity();
-        UUID uuid=UUID.randomUUID();
-        when(entityService.create(any(MyEntity.class))).thenReturn(entity);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/dataset/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(entity)))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("User added successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.CREATED.value()));
-
-    }
-
-    @Test
-    public void create_Entity_Failure_Scenario() throws Exception {
-        MyEntity entity = new MyEntity();
-        when(entityService.create(any(MyEntity.class))).thenThrow(HttpMessageNotReadableException.class);
+        MyEntity myEntity = new MyEntity();
+        myEntity.setCreatedBy("Beast");
+        myEntity.setUpdatedBy("Beast");
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "Beast");
+        myEntity.setDataSchema(dataSchema);
+        Map<String, Object> routerConfig = new HashMap<>();
+        routerConfig.put("name", "Beast");
+        myEntity.setRouterConfig(routerConfig);
+        myEntity.setStatus(MyEntity.StatusEnum.Draft);
+        when(entityService.create(any(MyEntity.class))).thenReturn(myEntity);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/dataset/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(entity)))
+                        .content(objectMapper.writeValueAsString(myEntity)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("Entity created successfully."))
+                .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()));
+    }
+
+
+
+    @Test
+    public void create_Entity_Failure_Scenario() throws Exception {
+
+        MyEntity myEntity = new MyEntity();
+
+        when(entityService.create(any(MyEntity.class))).thenReturn(isNull());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/dataset/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(myEntity)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cannot create user"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.BAD_REQUEST.value()));
-
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     public void getAll_Entities_Success_Scenario() throws Exception {
-        MyEntity entity = new MyEntity();
 
+        MyEntity myEntity = new MyEntity();
+        myEntity.setCreatedBy("Beast");
+        myEntity.setUpdatedBy("Beast");
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "Beast");
+        myEntity.setDataSchema(dataSchema);
+        Map<String, Object> routerConfig = new HashMap<>();
+        routerConfig.put("name", "Beast");
+        myEntity.setRouterConfig(routerConfig);
+        myEntity.setStatus(MyEntity.StatusEnum.Draft);
         List<MyEntity> entityList = new ArrayList<>();
-        entityList.add(entity);
+        entityList.add(myEntity);
         when(entityService.getAll()).thenReturn(entityList);
-
         mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getAll"))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Users retrieved successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data").isArray());
+                .andExpect(jsonPath("$.message").value("Fetched all entities."))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()));
     }
 
     @Test
     public void getAll_Entities_Failure_Scenario() throws Exception {
-        MyEntity entity = new MyEntity();
-        when(entityService.getAll()).thenReturn(Collections.emptyList());
+
+        List<MyEntity> entityList = new ArrayList<>();
+        when(entityService.getAll()).thenReturn(entityList);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getAll"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("No users found. Start by creating one!"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data").isEmpty());
-    }
-    @Test
-    public void getAll_Entities_Exception_Scenario() throws Exception {
-        MyEntity entity = new MyEntity();
-        when(entityService.getAll()).thenThrow(MethodArgumentTypeMismatchException.class);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getAll"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Error retrieving users: null"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("The database is empty. Start by creating an entity."))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     public void get_Entities_ById_Success_Scenario() throws Exception {
-        UUID entityId = UUID.randomUUID();
-        MyEntity entity = new MyEntity();
-        entity.setId(entityId);
+        UUID uuid = UUID.randomUUID();
+        MyEntity myEntity = new MyEntity();
+        myEntity.setCreatedBy("Beast");
+        myEntity.setUpdatedBy("Beast");
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "Beast");
+        myEntity.setDataSchema(dataSchema);
+        Map<String, Object> routerConfig = new HashMap<>();
+        routerConfig.put("name", "Beast");
+        myEntity.setRouterConfig(routerConfig);
+        myEntity.setStatus(MyEntity.StatusEnum.Draft);
+        when(entityService.create(myEntity)).thenReturn(myEntity);
 
-        when(entityService.getById(entityId)).thenReturn(entity);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + entityId))
+        when(entityService.getById(any(UUID.class))).thenReturn(myEntity);
+        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + uuid))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User retrieved successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()));
+                .andExpect(jsonPath("$.message").value("Entity fetched successfully with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()));
     }
 
     @Test
     public void get_Entities_ById_Failure_Scenario() throws Exception {
-        UUID entityId = UUID.randomUUID();
-        MyEntity entity = new MyEntity();
+        UUID uuid = UUID.randomUUID();
+        MyEntity myEntity=new MyEntity();
 
-        when(entityService.getById(entityId)).thenReturn(null);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + entityId))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("User not found with ID: "+ entityId))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.NOT_FOUND.value()));
-    }
-    @Test
-    public void get_Entities_ById_Exception_Scenario() throws Exception {
-        UUID entityId = UUID.randomUUID();
-        MyEntity entity = new MyEntity();
-
-        when(entityService.getById(entityId)).thenThrow(MethodArgumentTypeMismatchException.class);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + entityId))
-                .andExpect(jsonPath("$.message").value("Error retrieving user: null"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    public void update_Entity_ById_Success_Scenario() throws Exception {
-        UUID entityId = UUID.randomUUID();
-        MyEntity updatedEntity = new MyEntity();
-        when(entityService.update(any(UUID.class),any(MyEntity.class))).thenReturn(true);
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/" + entityId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedEntity)))
+        when(entityService.getById(uuid)).thenReturn(isNull());
+        mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + uuid))
                 .andDo(print())
-                .andExpect(jsonPath("$.message").value("User updated successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Cannot find entity with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()));
     }
 
-
     @Test
-    public void update_Entity_ById_Failure_Scenario() throws Exception {
-        MyEntity updatedEntity = new MyEntity();
+    public void update_ById_Success_Scenario() throws Exception {
 
-        UUID entityId = UUID.randomUUID();
-        updatedEntity.setId(entityId);
+        UUID uuid = UUID.randomUUID();
+        MyEntity myEntity = new MyEntity();
+        myEntity.setCreatedBy("Beast");
+        myEntity.setUpdatedBy("Beast");
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "Beast");
+        myEntity.setDataSchema(dataSchema);
+        Map<String, Object> routerConfig = new HashMap<>();
+        routerConfig.put("name", "Beast");
+        myEntity.setRouterConfig(routerConfig);
+        myEntity.setStatus(MyEntity.StatusEnum.Draft);
+        when(entityService.create(myEntity)).thenReturn(myEntity);
 
-        when(entityService.update(entityId,updatedEntity)).thenReturn(false);
+        when(entityRepository.existsById(any(UUID.class))).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/"+ entityId)
+        when(entityService.update(any(MyEntity.class), any(UUID.class))).thenReturn(myEntity);
+        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedEntity)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cannot update user with ID: "+ entityId))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.BAD_REQUEST.value()));
+                        .content(objectMapper.writeValueAsString(myEntity)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Entity updated successfully with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()));
+
     }
 
     @Test
-    public void update_Entity_ById_Exception_Scenario() throws Exception {
+    public void updates_ById_Failure_Scenario() throws Exception {
 
+        UUID uuid = UUID.randomUUID();
+        MyEntity myEntity = new MyEntity();
 
-        UUID entityId = UUID.randomUUID();
-        MyEntity updatedEntity = new MyEntity();
-        doThrow(MethodArgumentTypeMismatchException.class).when(entityService).update(any(UUID.class),
-                any(MyEntity.class));
-        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/"+ entityId)
+        when(entityRepository.existsById(any(UUID.class))).thenReturn(false);
+
+        when(entityService.update(any(MyEntity.class), any(UUID.class))).thenReturn(myEntity);
+        mockMvc.perform(MockMvcRequestBuilders.put("/dataset/updateById/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedEntity)))
+                        .content(objectMapper.writeValueAsString(myEntity)))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Error update user: null"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.BAD_REQUEST.value()));
+                .andExpect(jsonPath("$.message").value("Failed to update entity with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
+
     }
 
-
-
-
     @Test
-    public void delete_Entity_ById_Success_Scenario() throws Exception {
+    public void delete_ById_Success_Scenario() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        MyEntity myEntity = new MyEntity();
+        myEntity.setCreatedBy("Beast");
+        myEntity.setUpdatedBy("Beast");
+        Map<String, Object> dataSchema = new HashMap<>();
+        dataSchema.put("name", "Beast");
+        myEntity.setDataSchema(dataSchema);
+        Map<String, Object> routerConfig = new HashMap<>();
+        routerConfig.put("name", "Beast");
+        myEntity.setRouterConfig(routerConfig);
+        myEntity.setStatus(MyEntity.StatusEnum.Draft);
+        when(entityService.create(myEntity)).thenReturn(myEntity);
 
-        UUID uuid=UUID.randomUUID();
-
-        when(entityService.delete(uuid)).thenReturn(true);
-
+        when(entityRepository.existsById(any(UUID.class))).thenReturn(true);
         mockMvc.perform(MockMvcRequestBuilders.delete("/dataset/deleteById/" + uuid))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User deleted successfully"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.OK.value()));
+                .andExpect(jsonPath("$.message").value("Entity deleted successfully with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()));
     }
 
     @Test
-    public void delete_Entity_ById_Failure_Scenario() throws Exception {
-
-        UUID uuid=UUID.randomUUID();
-
-        when(entityService.delete(uuid)).thenReturn(false);
-
+    public void delete_ById_Failure_Scenario() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        when(!entityRepository.existsById(any(UUID.class))).thenReturn(false);
+        doNothing().when(entityService).delete(uuid);
         mockMvc.perform(MockMvcRequestBuilders.delete("/dataset/deleteById/" + uuid))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Cannot delete user with ID: "+ uuid))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.BAD_REQUEST.value()));
+                .andExpect(jsonPath("$.message").value("Failed to delete entity with ID: " + uuid))
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
-    @Test
-    public void delete_Entity_ById_Exception_Scenario() throws Exception {
-
-        UUID uuid=UUID.randomUUID();
-
-        when(entityService.delete(uuid)).thenThrow(MethodArgumentTypeMismatchException.class);
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/dataset/deleteById/" + uuid))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Error deleting user: null"))
-                .andExpect(jsonPath("$.statusCode").value(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-    }
 }

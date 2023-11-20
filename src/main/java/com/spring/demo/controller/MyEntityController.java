@@ -1,6 +1,8 @@
 package com.spring.demo.controller;
 
 import com.spring.demo.entity.MyEntity;
+import com.spring.demo.exception.MyEntityException;
+import com.spring.demo.repository.MyEntityRepository;
 import com.spring.demo.service.MyEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -22,15 +25,21 @@ public class MyEntityController {
         this.entityService = entityService;
     }
 
+    @Autowired
+    MyEntityRepository entityRepository;
+
     @Transactional
     @PostMapping("/create")
     public ResponseEntity<CustomResponse> createEntity(@RequestBody MyEntity entity) {
         try {
-            MyEntity createdEntity = entityService.create(entity);
-            CustomResponse response = new CustomResponse("User added successfully", HttpStatus.CREATED.value());
+            MyEntity myEntity1 = entityService.create(entity);
+            if (myEntity1 == null) {
+                throw new MyEntityException("Failed to create user ");
+            }
+            CustomResponse response = new CustomResponse("Entity created successfully.", HttpStatus.CREATED.value());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
-            CustomResponse response = new CustomResponse("Cannot create user", HttpStatus.BAD_REQUEST.value());
+            CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -39,79 +48,67 @@ public class MyEntityController {
     @Transactional
     @GetMapping("/getAll")
     public ResponseEntity<CustomResponse> getAllEntities() {
-       try{
-           List<MyEntity> entities = entityService.getAll();
-           if (!entities.isEmpty()) {
-               CustomResponse response = new CustomResponse("Users retrieved successfully", HttpStatus.OK.value(),entities);
-               return ResponseEntity.ok(response);
-           } else {
-               CustomResponse response = new CustomResponse("No users found. Start by creating one!", HttpStatus.OK.value(),entities);
-               return ResponseEntity.ok(response);
-           }
-
-       }
-       catch (Exception e) {
-           CustomResponse response = new CustomResponse("Error retrieving users: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-       }
+        try {
+            List<MyEntity> entityList = entityService.getAll();
+            if (entityList.isEmpty()) {
+                throw new MyEntityException("The database is empty. Start by creating an entity.");
+            }
+            CustomResponse response = new CustomResponse("Fetched all entities.", HttpStatus.OK.value(), entityList);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     @Transactional
     @GetMapping("/getById/{id}")
     public ResponseEntity<CustomResponse> getEntity(@PathVariable UUID id) {
-        try{
-            MyEntity entity = entityService.getById(id);
-
-            if (entity != null) {
-                CustomResponse response = new CustomResponse("User retrieved successfully", HttpStatus.OK.value(), entity);
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            } else {
-                CustomResponse response = new CustomResponse("User not found with ID: " + id, HttpStatus.NOT_FOUND.value());
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        try {
+            Optional<MyEntity> optionalMyEntity = Optional.ofNullable(entityService.getById(id));
+            if (optionalMyEntity.isEmpty()) {
+                throw new MyEntityException("Cannot find entity with ID: " + id);
             }
+            CustomResponse response = new CustomResponse("Entity fetched successfully with ID: " + id, HttpStatus.OK.value(), optionalMyEntity);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
-            CustomResponse response = new CustomResponse("Error retrieving user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
-    @Transactional
     @PutMapping("/updateById/{id}")
-    public ResponseEntity<CustomResponse> updateEntity(@PathVariable UUID id, @RequestBody MyEntity updatedEntity) {
+    public ResponseEntity<CustomResponse> updateEntity(@PathVariable UUID id, @RequestBody MyEntity myEntity) {
         try {
-            boolean updated = entityService.update(id, updatedEntity);
-
-            if (updated) {
-                CustomResponse response = new CustomResponse("User updated successfully", HttpStatus.OK.value());
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            } else {
-                CustomResponse response = new CustomResponse("Cannot update user with ID: " + id, HttpStatus.BAD_REQUEST.value());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            if(!entityRepository.existsById(id)){
+                throw new MyEntityException("Failed to update entity with ID: " + id);
             }
-        } catch (MethodArgumentTypeMismatchException e) {
-            CustomResponse response = new CustomResponse("Error update user: " + e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            MyEntity updatedEntity = entityService.update(myEntity, id);
+            CustomResponse response = new CustomResponse("Entity updated successfully with ID: " + id,
+                     HttpStatus.OK.value(),updatedEntity);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
 
+
     @Transactional
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<CustomResponse> deleteEntity(@PathVariable UUID id) {
-       try{
-           boolean deleted = entityService.delete(id);
-
-           if (deleted) {
-               CustomResponse response = new CustomResponse("User deleted successfully", HttpStatus.OK.value());
-               return ResponseEntity.status(HttpStatus.OK).body(response);
-           } else {
-               CustomResponse response = new CustomResponse("Cannot delete user with ID: " + id, HttpStatus.BAD_REQUEST.value());
-               return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-           }
-       }
-       catch (Exception e) {
-           CustomResponse response = new CustomResponse("Error deleting user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-       }
+        try {
+            if(!entityRepository.existsById(id)){
+                throw new MyEntityException("Failed to delete entity with ID: " + id);
+            }
+            entityService.delete(id);
+            CustomResponse response = new CustomResponse("Entity deleted successfully with ID: " + id,
+                    HttpStatus.OK.value());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 }

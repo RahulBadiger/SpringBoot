@@ -22,43 +22,27 @@ public class MyEntityService {
 
     public MyEntity create(MyEntity entity) {
 
-            MyEntity createdEntity = entityRepository.save(entity);
+        MyEntity createdEntity = entityRepository.save(entity);
 
-            return createdEntity;
-        }
+        return createdEntity;
+    }
 
     public List<MyEntity> getAll() {
-            List<MyEntity> entities = entityRepository.findAll();
-            return entities;
+        List<MyEntity> entities = entityRepository.findAll();
+        return entities;
 
     }
 
     public MyEntity getById(UUID id) {
-            Optional<MyEntity> entityOptional = entityRepository.findById(id);
-            return entityOptional.orElse(null);
-        }
-
-    public boolean update(UUID id, MyEntity updatedEntity) {
-            if (entityRepository.existsById(id)) {
-                updatedEntity.setCreatedBy("admin");
-                updatedEntity.setUpdatedBy("New Admin");
-                entityRepository.save(updatedEntity);
-                return true;
-            } else {
-                return false;
-            }
+        Optional<MyEntity> entityOptional = entityRepository.findById(id);
+        return entityOptional.orElse(null);
     }
 
+    public MyEntity update(MyEntity myEntity, UUID id) {
+        return entityRepository.save(myEntity);
+    }
 
-
-
-
-    public boolean delete(UUID id) {
-            if (entityRepository.existsById(id)) {
-                entityRepository.deleteById(id);
-                return true;
-            } else {
-                return false;
-        }
+    public void delete(UUID id) {
+        entityRepository.deleteById(id);
     }
 }

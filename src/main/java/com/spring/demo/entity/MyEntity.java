@@ -1,7 +1,6 @@
 package com.spring.demo.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Builder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -20,26 +19,21 @@ public class MyEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "id", columnDefinition = "UUID", updatable = false, nullable = false)
+    @Column(columnDefinition = "UUID",name = "id",nullable = false,unique = true,updatable = false)
     private UUID id;
-
+    @Column(name = "created_by",nullable = false)
+    private String createdBy;
+    @Column(name = "updated_by",nullable = false)
+    private String updatedBy;
     @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private Map<String , Object> dataSchema ;
-
+    @Column(columnDefinition = "json",nullable = false)
+    private Map<String,Object>dataSchema;
     @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private Map<String,Object> routerConfig;
-
+    @Column(columnDefinition = "json",nullable = false)
+    private Map<String,Object>routerConfig;
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusEnum status;
-
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @Column(name = "updated_by")
-    private String updatedBy;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
