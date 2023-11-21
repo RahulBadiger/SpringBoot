@@ -10,7 +10,7 @@ public class CustomResponse {
 
     public CustomResponse(String message, int status) {
         this.message = message;
-        this.status= status;
+        this.status = status;
     }
 
     public CustomResponse

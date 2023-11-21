@@ -1,9 +1,18 @@
 package com.spring.demo.exception;
 
-import org.springframework.http.HttpStatus;
+public class MyEntityException extends Exception {
+    private String message;
 
-public class MyEntityException extends Exception{
     public MyEntityException(String message) {
-        super(message);
+        this.setMessage(message);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

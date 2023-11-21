@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,13 +27,12 @@ public class MyEntityController {
     @Autowired
     MyEntityRepository entityRepository;
 
-    @Transactional
     @PostMapping("/create")
     public ResponseEntity<CustomResponse> createEntity(@RequestBody MyEntity entity) {
         try {
             MyEntity myEntity1 = entityService.create(entity);
             if (myEntity1 == null) {
-                throw new MyEntityException("Failed to create user ");
+                throw new MyEntityException("Failed to create user please try again..! ");
             }
             CustomResponse response = new CustomResponse("Entity created successfully.", HttpStatus.CREATED.value());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -45,7 +43,6 @@ public class MyEntityController {
     }
 
 
-    @Transactional
     @GetMapping("/getAll")
     public ResponseEntity<CustomResponse> getAllEntities() {
         try {
@@ -61,7 +58,6 @@ public class MyEntityController {
         }
     }
 
-    @Transactional
     @GetMapping("/getById/{id}")
     public ResponseEntity<CustomResponse> getEntity(@PathVariable UUID id) {
         try {
@@ -80,12 +76,12 @@ public class MyEntityController {
     @PutMapping("/updateById/{id}")
     public ResponseEntity<CustomResponse> updateEntity(@PathVariable UUID id, @RequestBody MyEntity myEntity) {
         try {
-            if(!entityRepository.existsById(id)){
+            if (!entityRepository.existsById(id)) {
                 throw new MyEntityException("Failed to update entity with ID: " + id);
             }
             MyEntity updatedEntity = entityService.update(myEntity, id);
             CustomResponse response = new CustomResponse("Entity updated successfully with ID: " + id,
-                     HttpStatus.OK.value(),updatedEntity);
+                    HttpStatus.OK.value(), updatedEntity);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             CustomResponse response = new CustomResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
@@ -94,12 +90,10 @@ public class MyEntityController {
     }
 
 
-
-    @Transactional
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<CustomResponse> deleteEntity(@PathVariable UUID id) {
         try {
-            if(!entityRepository.existsById(id)){
+            if (!entityRepository.existsById(id)) {
                 throw new MyEntityException("Failed to delete entity with ID: " + id);
             }
             entityService.delete(id);

@@ -3,7 +3,6 @@ package com.spring.demo.service;
 import com.spring.demo.entity.MyEntity;
 import com.spring.demo.repository.MyEntityRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -11,8 +10,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.doNothing;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
@@ -118,14 +116,16 @@ class MyEntityServiceTest {
     @Test
     void testDelete() {
         UUID id = UUID.randomUUID();
+        MyEntity myEntity=new MyEntity();
         when(entityRepository.existsById(id)).thenReturn(true);
-        doNothing().when(entityRepository).deleteById(id);
+        entityService.delete(id);
     }
     @Test
     void testNotDelete() {
         UUID id = UUID.randomUUID();
         when(!entityRepository.existsById(id)).thenReturn(false);
-        doNothing().when(entityRepository).deleteById(id);
+        entityService.delete(id);
+
     }
 
 

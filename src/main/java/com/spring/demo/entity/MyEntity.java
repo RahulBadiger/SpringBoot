@@ -14,23 +14,23 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "my_table")
-@TypeDefs({@TypeDef(name = "jsonb",typeClass = JsonBinaryType.class)})
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 public class MyEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(columnDefinition = "UUID",name = "id",nullable = false,unique = true,updatable = false)
+    @Column(columnDefinition = "UUID", name = "id", nullable = false, unique = true, updatable = false)
     private UUID id;
-    @Column(name = "created_by",nullable = false)
+    @Column(name = "created_by", nullable = false)
     private String createdBy;
-    @Column(name = "updated_by",nullable = false)
+    @Column(name = "updated_by", nullable = false)
     private String updatedBy;
     @Type(type = "jsonb")
-    @Column(columnDefinition = "json",nullable = false)
-    private Map<String,Object>dataSchema;
+    @Column(columnDefinition = "json", nullable = false)
+    private Map<String, Object> dataSchema;
     @Type(type = "jsonb")
-    @Column(columnDefinition = "json",nullable = false)
-    private Map<String,Object>routerConfig;
+    @Column(columnDefinition = "json", nullable = false)
+    private Map<String, Object> routerConfig;
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusEnum status;
@@ -41,14 +41,9 @@ public class MyEntity implements Serializable {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
-    public MyEntity() {
-        this.createdDate = LocalDateTime.now();
-        this.updatedDate = LocalDateTime.now();
-    }
 
-
-    public enum StatusEnum{
-        Live,Draft,Retired
+    public enum StatusEnum {
+        Live, Draft, Retired
     }
 
     public MyEntity(UUID id, Map<String, Object> dataSchema, Map<String, Object> routerConfig, StatusEnum status, String createdBy, String updatedBy, LocalDateTime createdDate, LocalDateTime updatedDate) {
@@ -124,6 +119,11 @@ public class MyEntity implements Serializable {
 
     public void setUpdatedDate(LocalDateTime updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public MyEntity() {
+        this.createdDate = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now();
     }
 
 }
