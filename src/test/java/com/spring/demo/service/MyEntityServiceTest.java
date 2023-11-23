@@ -116,10 +116,11 @@ class MyEntityServiceTest {
     @Test
     void testDelete() {
         UUID id = UUID.randomUUID();
-        MyEntity myEntity=new MyEntity();
+        MyEntity myEntity = new MyEntity();
         when(entityRepository.existsById(id)).thenReturn(true);
         entityService.delete(id);
     }
+
     @Test
     void testNotDelete() {
         UUID id = UUID.randomUUID();
@@ -127,6 +128,4 @@ class MyEntityServiceTest {
         entityService.delete(id);
 
     }
-
-
 }

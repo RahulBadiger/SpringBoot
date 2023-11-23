@@ -1,6 +1,5 @@
 package com.spring.demo.service;
 
-import com.spring.demo.controller.*;
 import com.spring.demo.entity.MyEntity;
 import com.spring.demo.repository.MyEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;

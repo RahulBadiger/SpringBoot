@@ -15,13 +15,13 @@ data:
       updated_date TIMESTAMP
     );
 
-    INSERT INTO my_table (dataSchema, routerConfig, status, created_by, updated_by)
-    VALUES (
-      '{"name": "spring", "type": "application"}'::jsonb,
-      '{"type": "jio", "speed": "60gb"}'::jsonb,
-      'Live',
-      'John Doe',
-      'John Doe'
-    );
+      INSERT INTO my_table (dataSchema, routerConfig, status, created_by, updated_by)
+      VALUES (
+        '{"name": "spring", "type": "application"}'::jsonb,
+        '{"type": "jio", "speed": "60gb"}'::jsonb,
+        'Live',
+        'John Doe',
+        'John Doe'
+      );
 
 

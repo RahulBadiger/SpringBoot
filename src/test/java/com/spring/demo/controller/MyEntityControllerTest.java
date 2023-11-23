@@ -73,7 +73,6 @@ public class MyEntityControllerTest {
     }
 
 
-
     @Test
     public void create_Entity_Failure_Scenario() throws Exception {
 
@@ -152,7 +151,7 @@ public class MyEntityControllerTest {
     @Test
     public void get_Entities_ById_Failure_Scenario() throws Exception {
         UUID uuid = UUID.randomUUID();
-        MyEntity myEntity=new MyEntity();
+        MyEntity myEntity = new MyEntity();
 
         when(entityService.getById(uuid)).thenReturn(isNull());
         mockMvc.perform(MockMvcRequestBuilders.get("/dataset/getById/" + uuid))
